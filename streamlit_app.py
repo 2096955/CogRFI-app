@@ -3,15 +3,21 @@ import os
 from openai import AzureOpenAI
 import time
 import re
+from layout import setup_page_layout, create_header, create_chat_container
 from theme import apply_theme
-from layout import (
-    setup_page_layout,
-    create_header,
-    create_chat_container,
-    format_assistant_message,
-    format_user_message,
-    create_sidebar
+
+# Set page configuration (must be the first Streamlit command)
+st.set_page_config(
+    page_title="Cognizant RFI Assistant",
+    page_icon="🤖",
+    layout="wide"
 )
+
+# Apply theme and setup page layout
+apply_theme()
+
+# Page title and header
+col1, col2, col3 = create_header()
 
 def init_client():
     return AzureOpenAI(
@@ -23,7 +29,7 @@ def init_client():
 def create_assistant(client):
     if 'assistant_id' not in st.session_state:
         assistant = client.beta.assistants.create(
-            model="gpt-4",
+            model="gpt-4o",
             instructions="""You are an AI language model specialized in drafting professional responses for bid proposals, as if you were Cognizant...""",
             tools=[{"type": "file_search", 
                    "file_search": {"ranking_options": {"ranker": "default_2024_08_21", "score_threshold": 0}}}],
@@ -57,15 +63,13 @@ def format_message_with_citations(message):
                 st.write("Available sources referenced")
 
 def main():
-    # Setup page layout and theme
-    setup_page_layout()
-    apply_theme()
-    
-    # Create layout
-    col1, col2, col3 = create_header()
-    create_sidebar()
+    # Create three columns for layout
+    col1, col2, col3 = st.columns([1, 3, 1])
     
     with col2:
+        # Add styled title without logo
+        st.markdown('<div class="title-container">RFI Assistant</div>', unsafe_allow_html=True)
+        
         # Initialize session state
         if 'client' not in st.session_state:
             st.session_state.client = init_client()
@@ -81,7 +85,7 @@ def main():
         if 'messages' not in st.session_state:
             st.session_state.messages = []
         
-        # Display existing messages
+        # Display chat messages
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 if message["role"] == "assistant":
@@ -90,7 +94,7 @@ def main():
                     st.write(message["content"])
 
         # Chat input
-        if prompt := st.chat_input("Ask your question about the RFI..."):
+        if prompt := st.chat_input("What is the RFI question requiring a response?"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(prompt)
@@ -101,6 +105,7 @@ def main():
                 content=prompt
             )
 
+            # Create a run
             run = st.session_state.client.beta.threads.runs.create(
                 thread_id=st.session_state.thread_id,
                 assistant_id=assistant_id
@@ -126,6 +131,16 @@ def main():
                         format_message_with_citations(assistant_message)
                     else:
                         st.error(f"Error: {run.status}")
+
+# Add footer note
+    with col2:
+        st.markdown("""
+        ---
+        <div style="text-align: center; color: #666; padding: 20px; font-size: 0.8em;">
+        This is a Cognizant RFI Assistant, using Azure OpenAI ChatGPT-4o over a RAG of existing RFI's which have scored well with the Public Sector.<br>
+        All outputs used should be checked by an SME within Cognizant.
+        </div>
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

@@ -18,7 +18,7 @@ def apply_theme():
         }}
         
         h1 {{
-            color: {COGNIZANT_BLUE};
+            color: {COGNIZANT_BLUE};  /* Ensure the title color is Cognizant Blue */
             font-weight: 600;
             padding: 1rem 0;
         }}
@@ -36,8 +36,9 @@ def apply_theme():
         }}
         
         .stChatMessage[data-testid="assistant-message"] {{
-            background-color: {WHITE};
-            border: 1px solid {LIGHT_BLUE};
+            background-color: #FFFFFF;
+            border: 1px solid #E8EEF9;
+            color: #333;  /* Ensures the text color is dark gray */
         }}
         
         .stChatInputContainer {{
@@ -56,6 +57,28 @@ def apply_theme():
             padding: 0.5rem;
             border-radius: 5px;
             margin: 0.5rem 0;
+        }}
+
+        /* Cognizant logo styles */
+        .logo-container {{
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }}
+
+        .logo-icon {{
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #00A9E0, #1B1464);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            margin-right: 1rem;
+        }}
+
+        .logo-text {{
+            margin: 0;
+            color: {COGNIZANT_BLUE};
+            font-size: 1.5rem;
+            font-weight: bold;
         }}
         </style>
     """, unsafe_allow_html=True)
